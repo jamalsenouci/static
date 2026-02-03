@@ -15,11 +15,13 @@
 #   --gh-host         GitHub Enterprise host for gh CLI
 #   --gh-repo         Repo path for gh CLI (e.g., user/repo)
 #
-# Example:
-#   curl -fsSL https://example.com/install.sh | bash -s -- "https://example.com" \
-#     --workspace-ssh "git@github.com:user/workspace.git" \
-#     --workspace-https "https://github.com/user/workspace.git" \
-#     --gh-host "github.com" --gh-repo "user/workspace"
+# Install command:
+#   curl -fsSL https://raw.githubusercontent.com/jamalsenouci/static/refs/heads/main/install.sh | bash -s -- \
+#     "https://snow.spotify.net/s/pm-os" \
+#     --workspace-ssh "git@ghe.spotify.net:jamals/workspace.git" \
+#     --workspace-https "https://ghe.spotify.net/jamals/workspace.git" \
+#     --gh-host "ghe.spotify.net" \
+#     --gh-repo "jamals/workspace"
 
 set -e
 
@@ -308,13 +310,19 @@ echo ""
 # Check if already installed
 if [ -d "$INSTALL_DIR/$APP_NAME.app" ]; then
     echo -e "${YELLOW}PM OS is already installed.${NC}"
-    echo ""
-    read -p "Do you want to reinstall? (y/N) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo -e "Opening existing installation..."
-        open "$INSTALL_DIR/$APP_NAME.app"
-        exit 0
+    if [ -t 0 ]; then
+        # Interactive mode - ask user
+        echo ""
+        read -p "Do you want to reinstall? (Y/n) " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Nn]$ ]]; then
+            echo -e "Opening existing installation..."
+            open "$INSTALL_DIR/$APP_NAME.app"
+            exit 0
+        fi
+    else
+        # Non-interactive (curl | bash) - reinstall by default
+        echo -e "  ${BLUE}→${NC} Reinstalling (non-interactive mode)..."
     fi
     echo -e "${BLUE}→${NC} Removing old version..."
     rm -rf "$INSTALL_DIR/$APP_NAME.app"
