@@ -189,6 +189,51 @@ install_node() {
     fi
 }
 
+# Optional dependencies for full functionality
+check_python() {
+    if command -v python3 &> /dev/null; then
+        echo -e "  ${GREEN}✓${NC} Python 3 found"
+        return 0
+    fi
+    return 1
+}
+
+install_python() {
+    echo -e "  ${YELLOW}!${NC} Python 3 not found. Installing via Homebrew..."
+    ensure_homebrew
+    brew install python3
+    if check_python; then
+        return 0
+    fi
+    return 1
+}
+
+check_gcloud() {
+    if command -v gcloud &> /dev/null; then
+        echo -e "  ${GREEN}✓${NC} Google Cloud CLI found"
+        return 0
+    fi
+    return 1
+}
+
+install_gcloud() {
+    echo -e "  ${YELLOW}!${NC} Google Cloud CLI not found. Installing via Homebrew..."
+    ensure_homebrew
+    brew install --cask google-cloud-sdk
+    if check_gcloud; then
+        return 0
+    fi
+    return 1
+}
+
+check_gh() {
+    if command -v gh &> /dev/null; then
+        echo -e "  ${GREEN}✓${NC} GitHub CLI found"
+        return 0
+    fi
+    return 1
+}
+
 # Check and install Git
 if ! check_git; then
     if [ -t 0 ]; then
@@ -221,6 +266,41 @@ if ! check_node; then
         fi
     else
         install_node || exit 1
+    fi
+fi
+
+# Check optional dependencies (not required, but recommended for full functionality)
+echo ""
+echo -e "  ${BLUE}Optional dependencies:${NC}"
+
+# Python 3 (for metrics and BigQuery)
+if ! check_python; then
+    echo -e "  ${YELLOW}○${NC} Python 3 not found (needed for metrics/BigQuery)"
+fi
+
+# Google Cloud CLI (for GCP integrations)
+if ! check_gcloud; then
+    echo -e "  ${YELLOW}○${NC} Google Cloud CLI not found (needed for GCP features)"
+fi
+
+# GitHub CLI (for easier repo cloning)
+if ! check_gh; then
+    echo -e "  ${YELLOW}○${NC} GitHub CLI not found (optional, for repo cloning)"
+fi
+
+echo ""
+
+# Offer to install missing optional dependencies
+MISSING_OPTIONAL=""
+command -v python3 &> /dev/null || MISSING_OPTIONAL="$MISSING_OPTIONAL python3"
+command -v gcloud &> /dev/null || MISSING_OPTIONAL="$MISSING_OPTIONAL gcloud"
+
+if [ -n "$MISSING_OPTIONAL" ] && [ -t 0 ]; then
+    read -p "  Install missing optional dependencies? (y/N) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        command -v python3 &> /dev/null || install_python
+        command -v gcloud &> /dev/null || install_gcloud
     fi
 fi
 echo ""
