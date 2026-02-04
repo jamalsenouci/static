@@ -481,8 +481,9 @@ rm -rf "$TEMP_DIR"
 # Step 3: Fix signature and remove quarantine (so it opens without Gatekeeper warning)
 echo ""
 echo -e "${YELLOW}[3/5]${NC} Configuring app..."
-# Remove all extended attributes (quarantine, provenance, etc.)
-xattr -cr "$INSTALL_DIR/$APP_NAME.app" 2>/dev/null || true
+# Remove quarantine and provenance attributes
+xattr -d com.apple.quarantine "$INSTALL_DIR/$APP_NAME.app" 2>/dev/null || true
+xattr -d com.apple.provenance "$INSTALL_DIR/$APP_NAME.app" 2>/dev/null || true
 # Ad-hoc sign the app to fix any signature issues
 codesign --force --deep --sign - "$INSTALL_DIR/$APP_NAME.app" 2>/dev/null || true
 echo -e "  ${GREEN}✓${NC} App configured"
