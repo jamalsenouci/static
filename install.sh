@@ -398,6 +398,7 @@ if [ "$DOWNLOAD_SUCCESS" = false ]; then
 
             if [ "$SIZE1" = "$SIZE2" ] && [ "$SIZE1" != "0" ]; then
                 cp "$DOWNLOADS_DIR/$DMG_NAME" "$DMG_PATH"
+                DOWNLOADED_FROM_BROWSER="$DOWNLOADS_DIR/$DMG_NAME"
                 DOWNLOAD_SUCCESS=true
                 echo -e "  ${GREEN}✓${NC} Found downloaded file"
                 break
@@ -477,6 +478,12 @@ hdiutil detach "$MOUNT_POINT" -quiet 2>/dev/null || true
 
 # Cleanup
 rm -rf "$TEMP_DIR"
+
+# Remove DMG from Downloads if it was downloaded via browser
+if [ -n "$DOWNLOADED_FROM_BROWSER" ] && [ -f "$DOWNLOADED_FROM_BROWSER" ]; then
+    rm -f "$DOWNLOADED_FROM_BROWSER"
+    echo -e "  ${GREEN}✓${NC} Cleaned up Downloads folder"
+fi
 
 # Step 3: Fix signature and remove quarantine (so it opens without Gatekeeper warning)
 echo ""
