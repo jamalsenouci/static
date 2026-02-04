@@ -478,10 +478,13 @@ hdiutil detach "$MOUNT_POINT" -quiet 2>/dev/null || true
 # Cleanup
 rm -rf "$TEMP_DIR"
 
-# Step 3: Remove quarantine (so it opens without Gatekeeper warning)
+# Step 3: Fix signature and remove quarantine (so it opens without Gatekeeper warning)
 echo ""
 echo -e "${YELLOW}[3/5]${NC} Configuring app..."
-xattr -rd com.apple.quarantine "$INSTALL_DIR/$APP_NAME.app" 2>/dev/null || true
+# Remove all extended attributes (quarantine, provenance, etc.)
+xattr -cr "$INSTALL_DIR/$APP_NAME.app" 2>/dev/null || true
+# Ad-hoc sign the app to fix any signature issues
+codesign --force --deep --sign - "$INSTALL_DIR/$APP_NAME.app" 2>/dev/null || true
 echo -e "  ${GREEN}✓${NC} App configured"
 
 # Step 4: Clone workspace repository (if configured)
