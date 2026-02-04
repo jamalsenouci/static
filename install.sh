@@ -34,7 +34,6 @@ NC='\033[0m' # No Color
 
 # Configuration
 APP_NAME="PM OS"
-VERSION="1.0.0"
 INSTALL_DIR="/Applications"
 
 # Parse arguments
@@ -100,10 +99,10 @@ echo ""
 # Detect architecture
 ARCH=$(uname -m)
 if [ "$ARCH" = "arm64" ]; then
-    DMG_NAME="PM OS-${VERSION}-arm64.dmg"
+    DMG_NAME="PM.OS-arm64.dmg"
     ARCH_DISPLAY="Apple Silicon"
 elif [ "$ARCH" = "x86_64" ]; then
-    DMG_NAME="PM OS-${VERSION}-x64.dmg"
+    DMG_NAME="PM.OS-x64.dmg"
     ARCH_DISPLAY="Intel"
 else
     echo -e "${RED}✗${NC} Unsupported architecture: $ARCH"
@@ -440,7 +439,7 @@ MOUNT_POINT=$(echo "$MOUNT_OUTPUT" | grep "/Volumes/" | sed 's/.*\(\/Volumes\/.*
 
 if [ -z "$MOUNT_POINT" ] || [ ! -d "$MOUNT_POINT" ]; then
     # Try common mount point names
-    for try_mount in "/Volumes/PM OS ${VERSION}" "/Volumes/PM OS" "/Volumes/PM OS-${VERSION}"; do
+    for try_mount in "/Volumes/PM OS" "/Volumes/PM.OS"; do
         if [ -d "$try_mount" ]; then
             MOUNT_POINT="$try_mount"
             break
